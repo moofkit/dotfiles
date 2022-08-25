@@ -65,11 +65,11 @@ source $ZSH/oh-my-zsh.sh
 # export LANG=en_US.UTF-8
 
 # Preferred editor for local and remote sessions
-# if [[ -n $SSH_CONNECTION ]]; then
-#   export EDITOR='vim'
-# else
-#   export EDITOR='mvim'
-# fi
+if [[ -n $SSH_CONNECTION ]]; then
+  export EDITOR='vim'
+else
+  export EDITOR='nvim'
+fi
 
 # Compilation flags
 # export ARCHFLAGS="-arch x86_64"
@@ -88,6 +88,7 @@ alias composer="php /usr/local/bin/composer.phar"
 alias be="bundle exec"
 alias zshreset='source ~/.zshrc'
 alias nvimconfig='nvim ~/.config/nvim/init.vim'
+alias alacrittyconfig='nvim ~/.config/alacritty/alacritty.yml'
 
 ###g git
 function gbclean() {
@@ -116,15 +117,11 @@ export PATH=/usr/local/opt/postgresql@12/bin/:$PATH
 test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
 
 
-eval $(thefuck --alias)
 eval "$(rbenv init -)"
 
 if type brew &>/dev/null; then
   FPATH=$(brew --prefix)/share/zsh/site-functions:$FPATH
 fi
-
-# anaconda executables bindings
-# export PATH=/usr/local/anaconda3/bin/:$PATH
 
 # python env
 # https://github.com/pyenv/pyenv/issues/1066#issuecomment-531510186
