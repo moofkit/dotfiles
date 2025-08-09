@@ -5,8 +5,7 @@ export ZSH=$HOME/.oh-my-zsh
 # Look in ~/.oh-my-zsh/themes/
 # Optionally, if you set this to "random", it'll load a random theme each
 # time that oh-my-zsh is loaded.
-ZSH_THEME="superjarin"
-
+# ZSH_THEME="spaceship"
 # Uncomment the following line to use case-sensitive completion.
 # CASE_SENSITIVE="true"
 
@@ -50,7 +49,7 @@ ZSH_THEME="superjarin"
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(brew git ruby rbenv zsh-autosuggestions)
+plugins=(brew git ruby zsh-autosuggestions)
 
 # User configuration
 
@@ -68,7 +67,7 @@ source $ZSH/oh-my-zsh.sh
 if [[ -n $SSH_CONNECTION ]]; then
   export EDITOR='vim'
 else
-  export EDITOR='nvim'
+  export EDITOR='vim'
 fi
 
 # Compilation flags
@@ -88,9 +87,8 @@ alias composer="php /usr/local/bin/composer.phar"
 alias be="bundle exec"
 alias zshreset='source ~/.zshrc'
 alias nvimconfig='nvim ~/.config/nvim/init.vim'
-alias alacrittyconfig='nvim ~/.config/alacritty/alacritty.yml'
 
-###g git
+### git
 function gbclean() {
 	local sourcebranch=${1:-master}
 	git checkout -q $sourcebranch
@@ -102,35 +100,55 @@ function gsetupstream() {
         local branch=$(git status --branch --short | awk '{print $2}')
         git branch --set-upstream-to=origin/$branch $branch
 }
+alias gsync=g sync
 
-export NVM_DIR="$HOME/.nvm"
-. "/usr/local/opt/nvm/nvm.sh"
-# POSTGRES
-# export PGHOST=localhost
-# export PGUSER=postgres
-# export PGPASSWORD=postgres
-# export LC_ALL=en_US.UTF-8
-export LANG=en_US.UTF-8
-export PATH=/usr/local/opt/postgresql@12/bin/:$PATH
+# copy branch name to clipboard
+alias gbcopy="git rev-parse --abbrev-ref HEAD | tr -d '\n' | pbcopy"
 
-
-test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
-
-
-eval "$(rbenv init -)"
 
 if type brew &>/dev/null; then
   FPATH=$(brew --prefix)/share/zsh/site-functions:$FPATH
 fi
 
-# python env
-# https://github.com/pyenv/pyenv/issues/1066#issuecomment-531510186
-# export SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk
-eval "$(pyenv init -)"
+# fzf search
+eval "$(fzf --zsh)"
 
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+# ssh key sharing https://code.visualstudio.com/remote/advancedcontainers/sharing-git-credentials#_using-ssh-keys
+if [ -z "$SSH_AUTH_SOCK" ]; then
+   # Check for a currently running instance of the agent
+   RUNNING_AGENT="`ps -ax | grep 'ssh-agent -s' | grep -v grep | wc -l | tr -d '[:space:]'`"
+   if [ "$RUNNING_AGENT" = "0" ]; then
+        # Launch a new instance of the agent
+        ssh-agent -s &> $HOME/.ssh/ssh-agent
+   fi
+   eval `cat $HOME/.ssh/ssh-agent`
+fi
 
-# asdf env
-. /usr/local/opt/asdf/libexec/asdf.sh
-export PATH="/usr/local/opt/mariadb@10.4/bin:$PATH"
+# postgres
+export PATH="/Applications/Postgres.app/Contents/Versions/latest/bin:$PATH"
+export LC_ALL=en_US.UTF-8
+export LANG=en_US.UTF-8
+export PGDATA="$(psql -U postgres \
+  -c 'SHOW data_directory' \
+  --tuples-only | sed 's/^[ \t]*//')"
 
+# starship prompt
+eval "$(starship init zsh)"
+
+# mise activate
+eval "$(~/.local/bin/mise activate zsh)"
+
+# The next line updates PATH for the Google Cloud SDK.
+if [ -f '/Users/divliev/Downloads/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/divliev/Downloads/google-cloud-sdk/path.zsh.inc'; fi
+
+# The next line enables shell command completion for gcloud.
+if [ -f '/Users/divliev/Downloads/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/divliev/Downloads/google-cloud-sdk/completion.zsh.inc'; fi
+
+# zellij settings for alacritty
+export ZELLIJ_AUTO_ATTACH=true
+if [ "$TERM" = "alacritty" ]; then
+        eval "$(zellij setup --generate-auto-start zsh)"
+fi
+
+# AWS credentials export
+eval $(aws configure export-credentials --format env)

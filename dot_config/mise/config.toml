@@ -1,0 +1,6 @@
+[tools]
+rust = "latest"
+ruby = "3.4.2"
+
+[settings]
+activate_aggressive = true
